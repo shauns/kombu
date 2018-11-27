@@ -56,7 +56,14 @@ def _reraise_errors(wrapper,
 
 def pickle_loads(s, load=pickle_load):
     # used to support buffer objects
-    return load(BytesIO(s))
+    if sys.version_info[0] == 3:  # pragma: no cover
+        # Handle de-pickling of objects that pickle into non-ascii byte string
+        load_pickle_options = {
+            "encoding": "bytes"
+        }
+    else:
+        load_pickle_options = {}
+    return load(BytesIO(s), **load_pickle_options)
 
 
 def parenthesize_alias(first, second):
